@@ -1,0 +1,7 @@
+gerar envelopes 
+
+apos
+
+algoritmo de dominancia
+faixas 
+plane sweep

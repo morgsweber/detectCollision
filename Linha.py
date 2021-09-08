@@ -14,7 +14,7 @@ from random import randint as rand
 
 """ Classe Linha """
 class Linha:
-    def __init__(self, minx: float = 0, miny: float = 0, maxx: float = 0, maxy: float = 0, x1: float = 0, y1: float = 0, x2: float = 0, y2: float = 0):
+    def __init__(self, minx: float = 0, miny: float = 0, maxx: float = 0, maxy: float = 0, x1: float = 0, y1: float = 0, x2: float = 0, y2: float = 0, centro: Ponto = (0,0,0), meiaLarg: float = 0, meiaAltura: float = 0):
         self.minx = minx
         self.miny = miny
         self.maxx = maxx
@@ -23,6 +23,9 @@ class Linha:
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
+        self.centro = centro
+        self.meiaLarg = meiaLarg
+        self.meiaAltura = meiaAltura
 
     """ Gera uma linha com tamanho 'tamMax' dentro de um limite 'limite'. Armazena os valores nas variaveis x1,x2,y1,y2."""
     def geraLinha(self, limite: int, tamMax: int):
@@ -42,6 +45,8 @@ class Linha:
         else:
             self.y2 = self.y1 - deltaY * tamMax
 
+        self.geraEnvelope()
+
     """ Desenha a linha na tela atual """
     def desenhaLinha(self):
         glBegin(GL_LINES)
@@ -50,3 +55,23 @@ class Linha:
         glVertex2f(self.x2, self.y2)
 
         glEnd()
+        
+
+    def geraEnvelope(self):
+        if (self.y1 > self.y2):
+            self.maxy = self.y1
+            self.miny = self.y2
+        else: 
+            self.maxy = self.y2
+            self.miny = self.y1
+
+        if (self.x1 > self.x2):
+            self.maxx = self.x1
+            self.minx = self.x2
+        else: 
+            self.maxx = self.x2
+            self.minx = self.x1
+
+        self.meiaLarg = (self.maxx - self.minx) / 2 
+        self.meiaAltura = (self.maxy - self.miny) / 2
+        self.centro = (((self.minx + self.maxx) /2), ((self.miny + self.maxy) /2))

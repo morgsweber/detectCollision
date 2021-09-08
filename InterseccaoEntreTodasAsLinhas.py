@@ -14,7 +14,7 @@ from Ponto import Ponto
 from Linha import Linha
 import time
 
-N_LINHAS = 50
+N_LINHAS = 100
 MAX_X = 100
 
 ContadorInt = 0
@@ -96,6 +96,20 @@ def HaInterseccao(k: Ponto, l: Ponto, m: Ponto, n: Ponto) -> bool:
 
 
 # **********************************************************************
+# HaInterseccaoAABB(E1: Linha, E2: Linha)
+# Detecta interseccao entre duas AABB
+#
+# **********************************************************************
+def HaInterseccaoAABB(E1: Linha, E2: Linha) -> bool:
+    if (abs(E1.centro[0] - E2.centro[0]) > E1.meiaLarg + E2.meiaLarg):
+        return False
+    if (abs(E1.centro[1] - E2.centro[1]) > E1.meiaAltura + E2.meiaAltura):
+        return False
+    return True
+
+
+
+# **********************************************************************
 # DesenhaLinhas()
 # Desenha as linha na tela
 #
@@ -116,7 +130,7 @@ def DesenhaLinhas():
 def DesenhaCenario():
     global ContChamadas, ContadorInt
 
-    PA, PB, PC, PD = Ponto(), Ponto(), Ponto(), Ponto()
+    PA, PB, PC, PD, = Ponto(), Ponto(), Ponto(), Ponto() 
     ContChamadas, ContadorInt = 0, 0
     
     # Desenha as linhas do cenário
@@ -130,13 +144,15 @@ def DesenhaCenario():
         for j in range(N_LINHAS):
             PC.set(linhas[j].x1, linhas[j].y1)
             PD.set(linhas[j].x2, linhas[j].y2)
-
-            ContChamadas += 1
-
-            if HaInterseccao(PA, PB, PC, PD):
-                ContadorInt += 1
-                linhas[i].desenhaLinha()
-                linhas[j].desenhaLinha()
+            #AQUI ENTRA NOSSO CODIGO DE ACELERAÇÃO
+            if HaInterseccaoAABB(linhas[i], linhas[j]):
+                ContChamadas += 1
+                if HaInterseccao(PA, PB, PC, PD):
+                    ContadorInt += 1
+                    linhas[i].desenhaLinha()
+                    linhas[j].desenhaLinha()
+            else:
+                pass
             
 
 # **********************************************************************
