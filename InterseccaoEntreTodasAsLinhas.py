@@ -21,6 +21,10 @@ ContadorInt = 0
 ContChamadas = 0
 
 linhas = []
+subdivisoes = 2
+celulas = [ [ 0 for i in range(SUBDIVISOES) ] for j in range(SUBDIVISOES) ]
+interAltura = 0
+interLargura = 0
 
 # **********************************************************************
 #  init()
@@ -29,6 +33,8 @@ linhas = []
 def init():
     global linhas
 
+    GeraSubdivisoes()
+
     # Define a cor do fundo da tela (BRANCO) 
     glClearColor(1.0, 1.0, 1.0, 1.0)
     
@@ -36,6 +42,14 @@ def init():
 
     for linha in linhas:
         linha.geraLinha(MAX_X, 10)
+        CadastraLinhaNasSubdivisoes()
+
+# **********************************************************************
+# CadastraLinhaNasSubdivisoes(int i)
+# armazena a linha na posição da matriz 
+# **********************************************************************
+def CadastraLinhaNasSubdivisoes(i: int):
+
 
 # **********************************************************************
 #  reshape( w: int, h: int )
@@ -107,6 +121,16 @@ def HaInterseccaoAABB(E1: Linha, E2: Linha) -> bool:
         return False
     return True
 
+
+# **********************************************************************
+#  GeraSubdivisoes( )
+#  Subdivide a janela em linhas e colunas
+#
+# **********************************************************************
+def GeraSubdivisoes():
+    global subdivisoes
+    interAltura = 500 / subdivisoes
+    interLargura = 650 / subdivisoes
 
 
 # **********************************************************************
