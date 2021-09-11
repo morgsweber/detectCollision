@@ -12,15 +12,24 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from Ponto import Ponto
 from Linha import Linha
+from Celula import Celula
+import collections
+import math
 import time
+import numpy as np
 
 N_LINHAS = 100
 MAX_X = 100
 
 ContadorInt = 0
 ContChamadas = 0
-
+interAltura = 0
+interLargura = 0
 linhas = []
+subdivisoesAltura = 10
+subdivisoesLargura = 10
+#matriz = np.empty((subdivisoesAltura, subdivisoesLargura), Celula()) 
+matriz = np.full((subdivisoesAltura, subdivisoesLargura), Celula())
 
 # **********************************************************************
 #  init()
@@ -28,14 +37,46 @@ linhas = []
 #/ **********************************************************************
 def init():
     global linhas
+    global matriz
+    GeraSubdivisoes()
 
     # Define a cor do fundo da tela (BRANCO) 
     glClearColor(1.0, 1.0, 1.0, 1.0)
     
     linhas = [Linha() for i in range(N_LINHAS)]
 
-    for linha in linhas:
+    for indice, linha in enumerate(linhas):
         linha.geraLinha(MAX_X, 10)
+        CadastraLinhaNasSubdivisoes(indice, linha)
+
+# **********************************************************************
+# CadastraLinhaNasSubdivisoes(indice: int, linha :Linha)
+# armazena a linha na posição 'indice' da matriz 
+# **********************************************************************
+def CadastraLinhaNasSubdivisoes(indice: int, linha: Linha):
+    global matriz
+    lMin = math.floor(linha.miny / interAltura)
+    jMin = math.floor(linha.minx / interLargura)
+    lMax = math.floor(linha.maxy / interAltura)
+    jMax = math.floor(linha.maxx / interLargura)
+    for l in range (lMin, lMax):
+        for j in range(jMin, jMax):
+            matriz[l][j].set(indice)
+
+# **********************************************************************
+#  GeraSubdivisoes( )
+#  Subdivide a janela em linhas e colunas
+#
+# **********************************************************************
+def GeraSubdivisoes():
+    global subdivisoesAltura
+    global subdivisoesLargura
+    global interAltura 
+    global interLargura 
+    interAltura = 500 / subdivisoesAltura
+    interLargura = 650 / subdivisoesLargura
+
+
 
 # **********************************************************************
 #  reshape( w: int, h: int )
@@ -142,17 +183,18 @@ def DesenhaCenario():
         PB.set(linhas[i].x2, linhas[i].y2)
 
         for j in range(N_LINHAS):
-            PC.set(linhas[j].x1, linhas[j].y1)
-            PD.set(linhas[j].x2, linhas[j].y2)
-            #AQUI ENTRA NOSSO CODIGO DE ACELERAÇÃO
-            if HaInterseccaoAABB(linhas[i], linhas[j]):
-                ContChamadas += 1
-                if HaInterseccao(PA, PB, PC, PD):
-                    ContadorInt += 1
-                    linhas[i].desenhaLinha()
-                    linhas[j].desenhaLinha()
-            else:
-                pass
+                print(matriz[1][1].listaDeInteiros)
+                PC.set(linhas[j].x1, linhas[j].y1)
+                PD.set(linhas[j].x2, linhas[j].y2)
+                #AQUI ENTRA NOSSO CODIGO DE ACELERAÇÃO
+                if HaInterseccaoAABB(linhas[i], linhas[j]):
+                    ContChamadas += 1
+                    if HaInterseccao(PA, PB, PC, PD):
+                        ContadorInt += 1
+                        linhas[i].desenhaLinha()
+                        linhas[j].desenhaLinha()
+                else:
+                    pass
             
 
 # **********************************************************************
@@ -299,7 +341,6 @@ glutSpecialFunc(arrow_keys)
 
 #glutMouseFunc(mouse)
 #glutMotionFunc(mouseMove)
-
 
 try:
     # inicia o tratamento dos eventos
