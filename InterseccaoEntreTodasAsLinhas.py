@@ -29,7 +29,9 @@ linhas = []
 subdivisoesAltura = 10
 subdivisoesLargura = 10
 #matriz = np.empty((subdivisoesAltura, subdivisoesLargura), Celula()) 
-matriz = np.full((subdivisoesAltura, subdivisoesLargura), Celula())
+#matriz = np.full((subdivisoesAltura, subdivisoesLargura), Celuloa())
+#matriz = [[Celula() for i in range(subdivisoesAltura)] for j in range(subdivisoesLargura)]
+#matriz = np.full((subdivisoesAltura, subdivisoesLargura), [])
 
 # **********************************************************************
 #  init()
@@ -44,6 +46,8 @@ def init():
     glClearColor(1.0, 1.0, 1.0, 1.0)
     
     linhas = [Linha() for i in range(N_LINHAS)]
+    #matriz = [[Celula() for i in range(subdivisoesAltura)] for j in range(subdivisoesLargura)]
+    matriz = [[list() for i in range(subdivisoesAltura)] for j in range(subdivisoesLargura)]
 
     for indice, linha in enumerate(linhas):
         linha.geraLinha(MAX_X, 10)
@@ -54,14 +58,15 @@ def init():
 # armazena a linha na posição 'indice' da matriz 
 # **********************************************************************
 def CadastraLinhaNasSubdivisoes(indice: int, linha: Linha):
-    global matriz
+    #global matriz
     lMin = math.floor(linha.miny / interAltura)
     jMin = math.floor(linha.minx / interLargura)
     lMax = math.floor(linha.maxy / interAltura)
     jMax = math.floor(linha.maxx / interLargura)
     for l in range (lMin, lMax):
         for j in range(jMin, jMax):
-            matriz[l][j].set(indice)
+            print(indice)
+            matriz[l][j].append(indice)
 
 # **********************************************************************
 #  GeraSubdivisoes( )
@@ -169,7 +174,7 @@ def DesenhaLinhas():
 #
 # **********************************************************************
 def DesenhaCenario():
-    global ContChamadas, ContadorInt
+    global ContChamadas, ContadorInt, matriz
 
     PA, PB, PC, PD, = Ponto(), Ponto(), Ponto(), Ponto() 
     ContChamadas, ContadorInt = 0, 0
@@ -182,8 +187,10 @@ def DesenhaCenario():
         PA.set(linhas[i].x1, linhas[i].y1)
         PB.set(linhas[i].x2, linhas[i].y2)
 
+        #GeraCandidatasAColisao(i)
+
         for j in range(N_LINHAS):
-                print(matriz[1][1].listaDeInteiros)
+                #print(matriz[1][1])
                 PC.set(linhas[j].x1, linhas[j].y1)
                 PD.set(linhas[j].x2, linhas[j].y2)
                 #AQUI ENTRA NOSSO CODIGO DE ACELERAÇÃO
