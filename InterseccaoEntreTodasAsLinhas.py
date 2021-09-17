@@ -18,7 +18,7 @@ import math
 import time
 import numpy as np
 
-N_LINHAS = 100
+N_LINHAS = 1
 MAX_X = 100
 
 ContadorInt = 0
@@ -26,8 +26,9 @@ ContChamadas = 0
 interAltura = 0
 interLargura = 0
 linhas = []
-subdivisoesAltura = 10
-subdivisoesLargura = 10
+subdivisoesAltura = 2
+subdivisoesLargura = 2
+matriz = [[]]
 #matriz = np.empty((subdivisoesAltura, subdivisoesLargura), Celula()) 
 #matriz = np.full((subdivisoesAltura, subdivisoesLargura), Celuloa())
 #matriz = [[Celula() for i in range(subdivisoesAltura)] for j in range(subdivisoesLargura)]
@@ -50,7 +51,7 @@ def init():
     matriz = [[list() for i in range(subdivisoesAltura)] for j in range(subdivisoesLargura)]
 
     for indice, linha in enumerate(linhas):
-        linha.geraLinha(MAX_X, 10)
+        linha.geraLinha(MAX_X, 100)
         CadastraLinhaNasSubdivisoes(indice, linha)
 
 # **********************************************************************
@@ -58,15 +59,37 @@ def init():
 # armazena a linha na posição 'indice' da matriz 
 # **********************************************************************
 def CadastraLinhaNasSubdivisoes(indice: int, linha: Linha):
-    #global matriz
-    lMin = math.floor(linha.miny / interAltura)
-    jMin = math.floor(linha.minx / interLargura)
-    lMax = math.floor(linha.maxy / interAltura)
-    jMax = math.floor(linha.maxx / interLargura)
-    for l in range (lMin, lMax):
-        for j in range(jMin, jMax):
-            print(indice)
-            matriz[l][j].append(indice)
+    global matriz
+    yMin = math.floor(linha.miny / interAltura)
+    xMin = math.floor(linha.minx / interLargura)
+    yMax = math.floor(linha.maxy / interAltura)
+    xMax = math.floor(linha.maxx / interLargura)
+    #print(yMin, yMax)
+    #print(xMin, xMax)
+    if yMin == yMax and xMin == xMax:
+        matriz[yMin][xMin].append(indice)
+    elif yMin != yMax and xMin == xMax:
+        for y in range(yMin, yMax):
+            matriz[y][xMin].append(indice)
+    elif yMin == yMax and xMin != xMax:
+        for x in range(xMin, xMax):
+            matriz[yMin][x].append(indice)
+    elif yMin != yMax and xMin != xMax:
+        for y in range(yMin, yMax):
+            for x in range(xMin, xMax):
+                matriz[y][x].append(indice)
+
+        #for y in range (yMin, yMax):
+            #if xMin != xMax:
+                #for x in range(xMin, xMax):
+                    #matriz[y][x].append(indice)
+            #else:
+                    #matriz[y][x].append(indice)
+    #else: 
+        #for x in range(xMin, xMax):
+            #matriz[yMin][x].append(indice)
+
+
 
 # **********************************************************************
 #  GeraSubdivisoes( )
@@ -174,7 +197,7 @@ def DesenhaLinhas():
 #
 # **********************************************************************
 def DesenhaCenario():
-    global ContChamadas, ContadorInt, matriz
+    global ContChamadas, ContadorInt
 
     PA, PB, PC, PD, = Ponto(), Ponto(), Ponto(), Ponto() 
     ContChamadas, ContadorInt = 0, 0
@@ -190,7 +213,6 @@ def DesenhaCenario():
         #GeraCandidatasAColisao(i)
 
         for j in range(N_LINHAS):
-                #print(matriz[1][1])
                 PC.set(linhas[j].x1, linhas[j].y1)
                 PD.set(linhas[j].x2, linhas[j].y2)
                 #AQUI ENTRA NOSSO CODIGO DE ACELERAÇÃO
