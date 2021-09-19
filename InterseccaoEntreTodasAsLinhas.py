@@ -18,7 +18,7 @@ import math
 import time
 import numpy as np
 
-N_LINHAS = 1
+N_LINHAS = 2
 MAX_X = 100
 
 ContadorInt = 0
@@ -197,7 +197,7 @@ def DesenhaLinhas():
 #
 # **********************************************************************
 def DesenhaCenario():
-    global ContChamadas, ContadorInt
+    global ContChamadas, ContadorInta, matriz
 
     PA, PB, PC, PD, = Ponto(), Ponto(), Ponto(), Ponto() 
     ContChamadas, ContadorInt = 0, 0
@@ -207,11 +207,10 @@ def DesenhaCenario():
     glColor3f(1,0,0)
     
     for i in range(N_LINHAS):
+        print(matriz[1][1])
         PA.set(linhas[i].x1, linhas[i].y1)
         PB.set(linhas[i].x2, linhas[i].y2)
-
         #GeraCandidatasAColisao(i)
-
         for j in range(N_LINHAS):
                 PC.set(linhas[j].x1, linhas[j].y1)
                 PD.set(linhas[j].x2, linhas[j].y2)
