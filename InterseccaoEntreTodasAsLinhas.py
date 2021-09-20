@@ -26,8 +26,8 @@ ContChamadas = 0
 interAltura = 0
 interLargura = 0
 linhas = []
-subdivisoesAltura = 2
-subdivisoesLargura = 2
+subdivisoesAltura = 50
+subdivisoesLargura = 50
 matriz = [[]]
 #matriz = np.empty((subdivisoesAltura, subdivisoesLargura), Celula()) 
 #matriz = np.full((subdivisoesAltura, subdivisoesLargura), Celuloa())
@@ -220,6 +220,7 @@ def DesenhaCenario():
         PB.set(linhas[i].x2, linhas[i].y2)
         vetCandidatas = GeraCandidatasAColisao(linhas[i])
         for j in vetCandidatas:  
+            if j != linhas[i]:
                 PC.set(j.x1, j.y1)
                 PD.set(j.x2, j.y2)
                 if HaInterseccaoAABB(linhas[i], j):
@@ -238,9 +239,9 @@ def DesenhaCenario():
 #
 # **********************************************************************
 
-def GeraCandidatasAColisao(linha: Linha()) -> list[Linha()]:
+def GeraCandidatasAColisao(linha: Linha()) -> set():
     global matriz, linhas
-    candidatas = []
+    candidatas = set()
     linha.miny = 0 if linha.miny < 0 else linha.miny
     linha.minx = 0 if linha.minx < 0 else linha.minx
     linha.maxy = 0 if linha.maxy < 0 else linha.maxy
@@ -258,20 +259,20 @@ def GeraCandidatasAColisao(linha: Linha()) -> list[Linha()]:
 
     if yMin == yMax and xMin == xMax:
         for indiceLinha in matriz[yMin][xMin]:
-            candidatas.append(linhas[indiceLinha])
+            candidatas.add(linhas[indiceLinha])
     elif yMin != yMax and xMin == xMax:
         for y in range(yMin, yMax):
             for indiceLinha in matriz[y][xMin]:
-                candidatas.append(linhas[indiceLinha])
+                candidatas.add(linhas[indiceLinha])
     elif yMin == yMax and xMin != xMax:
         for x in range(xMin, xMax):
             for indiceLinha in matriz[yMin][x]:
-                candidatas.append(linhas[indiceLinha])
+                candidatas.add(linhas[indiceLinha])
     elif yMin != yMax and xMin != xMax:
         for y in range(yMin, yMax):
             for x in range(xMin, xMax):
                 for indiceLinha in matriz[y][x]:
-                    candidatas.append(linhas[indiceLinha])
+                    candidatas.add(linhas[indiceLinha])
 
     return candidatas
 
