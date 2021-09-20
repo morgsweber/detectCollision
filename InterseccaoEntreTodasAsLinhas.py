@@ -18,7 +18,7 @@ import math
 import time
 import numpy as np
 
-N_LINHAS = 2
+N_LINHAS = 5
 MAX_X = 100
 
 ContadorInt = 0
@@ -51,7 +51,7 @@ def init():
     matriz = [[list() for i in range(subdivisoesAltura)] for j in range(subdivisoesLargura)]
 
     for indice, linha in enumerate(linhas):
-        linha.geraLinha(MAX_X, 100)
+        linha.geraLinha(MAX_X, 10)
         CadastraLinhaNasSubdivisoes(indice, linha)
 
 # **********************************************************************
@@ -60,6 +60,11 @@ def init():
 # **********************************************************************
 def CadastraLinhaNasSubdivisoes(indice: int, linha: Linha):
     global matriz
+    linha.miny = 0 if linha.miny < 0 else linha.miny
+    linha.minx = 0 if linha.minx < 0 else linha.minx
+    linha.maxy = 0 if linha.maxy < 0 else linha.maxy
+    linha.maxx = 0 if linha.maxx < 0 else linha.maxx
+
     yMin = math.floor(linha.miny / interAltura)
     xMin = math.floor(linha.minx / interLargura)
     yMax = math.floor(linha.maxy / interAltura)
@@ -101,8 +106,8 @@ def GeraSubdivisoes():
     global subdivisoesLargura
     global interAltura 
     global interLargura 
-    interAltura = 500 / subdivisoesAltura
-    interLargura = 650 / subdivisoesLargura
+    interLargura = 100 / subdivisoesLargura
+    interAltura = 100 / subdivisoesAltura
 
 
 
@@ -186,7 +191,7 @@ def HaInterseccaoAABB(E1: Linha, E2: Linha) -> bool:
 def DesenhaLinhas():
     global linhas
 
-    glColor3f(0,1,0)
+    glColor3f(0,0,0)
 
     for linha in linhas:
         linha.desenhaLinha()
@@ -207,7 +212,7 @@ def DesenhaCenario():
     glColor3f(1,0,0)
     
     for i in range(N_LINHAS):
-        print(matriz[1][1])
+        print(matriz[0][0])
         PA.set(linhas[i].x1, linhas[i].y1)
         PB.set(linhas[i].x2, linhas[i].y2)
         #GeraCandidatasAColisao(i)
