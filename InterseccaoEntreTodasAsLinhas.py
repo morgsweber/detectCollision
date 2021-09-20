@@ -18,7 +18,7 @@ import math
 import time
 import numpy as np
 
-N_LINHAS = 5
+N_LINHAS = 500
 MAX_X = 100
 
 ContadorInt = 0
@@ -48,7 +48,7 @@ def init():
     
     linhas = [Linha() for i in range(N_LINHAS)]
     #matriz = [[Celula() for i in range(subdivisoesAltura)] for j in range(subdivisoesLargura)]
-    matriz = [[list() for i in range(subdivisoesAltura)] for j in range(subdivisoesLargura)]
+    matriz = [[list() for i in range(subdivisoesAltura+1)] for j in range(subdivisoesLargura+1)]
 
     for indice, linha in enumerate(linhas):
         linha.geraLinha(MAX_X, 10)
@@ -64,6 +64,10 @@ def CadastraLinhaNasSubdivisoes(indice: int, linha: Linha):
     linha.minx = 0 if linha.minx < 0 else linha.minx
     linha.maxy = 0 if linha.maxy < 0 else linha.maxy
     linha.maxx = 0 if linha.maxx < 0 else linha.maxx
+    linha.miny = 100 if linha.miny > 100 else linha.miny
+    linha.minx = 100 if linha.minx > 100 else linha.minx
+    linha.maxy = 100 if linha.maxy > 100 else linha.maxy
+    linha.maxx = 100 if linha.maxx > 100 else linha.maxx
 
     yMin = math.floor(linha.miny / interAltura)
     xMin = math.floor(linha.minx / interLargura)
@@ -202,7 +206,7 @@ def DesenhaLinhas():
 #
 # **********************************************************************
 def DesenhaCenario():
-    global ContChamadas, ContadorInta, matriz
+    global ContChamadas, ContadorInt, matriz
 
     PA, PB, PC, PD, = Ponto(), Ponto(), Ponto(), Ponto() 
     ContChamadas, ContadorInt = 0, 0
@@ -212,23 +216,66 @@ def DesenhaCenario():
     glColor3f(1,0,0)
     
     for i in range(N_LINHAS):
-        print(matriz[0][0])
         PA.set(linhas[i].x1, linhas[i].y1)
         PB.set(linhas[i].x2, linhas[i].y2)
-        #GeraCandidatasAColisao(i)
-        for j in range(N_LINHAS):
-                PC.set(linhas[j].x1, linhas[j].y1)
-                PD.set(linhas[j].x2, linhas[j].y2)
-                #AQUI ENTRA NOSSO CODIGO DE ACELERAÇÃO
-                if HaInterseccaoAABB(linhas[i], linhas[j]):
+        vetCandidatas = GeraCandidatasAColisao(linhas[i])
+        for j in vetCandidatas:  
+                PC.set(j.x1, j.y1)
+                PD.set(j.x2, j.y2)
+                if HaInterseccaoAABB(linhas[i], j):
                     ContChamadas += 1
                     if HaInterseccao(PA, PB, PC, PD):
                         ContadorInt += 1
                         linhas[i].desenhaLinha()
-                        linhas[j].desenhaLinha()
+                        j.desenhaLinha()
                 else:
                     pass
             
+# **********************************************************************
+# GeraCandidatasAColisao(index: int) -> List[Linha()]
+# Função que gera uma lista de linhas candidatas, baseada na subdivisão do espaço,
+# à colisão com uma determinada linha.`
+#
+# **********************************************************************
+
+def GeraCandidatasAColisao(linha: Linha()) -> list[Linha()]:
+    global matriz, linhas
+    candidatas = []
+    linha.miny = 0 if linha.miny < 0 else linha.miny
+    linha.minx = 0 if linha.minx < 0 else linha.minx
+    linha.maxy = 0 if linha.maxy < 0 else linha.maxy
+    linha.maxx = 0 if linha.maxx < 0 else linha.maxx
+    linha.miny = 100 if linha.miny > 100 else linha.miny
+    linha.minx = 100 if linha.minx > 100 else linha.minx
+    linha.maxy = 100 if linha.maxy > 100 else linha.maxy
+    linha.maxx = 100 if linha.maxx > 100 else linha.maxx
+
+
+    yMin = math.floor(linha.miny / interAltura)
+    xMin = math.floor(linha.minx / interLargura)
+    yMax = math.floor(linha.maxy / interAltura)
+    xMax = math.floor(linha.maxx / interLargura)
+
+    if yMin == yMax and xMin == xMax:
+        for indiceLinha in matriz[yMin][xMin]:
+            candidatas.append(linhas[indiceLinha])
+    elif yMin != yMax and xMin == xMax:
+        for y in range(yMin, yMax):
+            for indiceLinha in matriz[y][xMin]:
+                candidatas.append(linhas[indiceLinha])
+    elif yMin == yMax and xMin != xMax:
+        for x in range(xMin, xMax):
+            for indiceLinha in matriz[yMin][x]:
+                candidatas.append(linhas[indiceLinha])
+    elif yMin != yMax and xMin != xMax:
+        for y in range(yMin, yMax):
+            for x in range(xMin, xMax):
+                for indiceLinha in matriz[y][x]:
+                    candidatas.append(linhas[indiceLinha])
+
+    return candidatas
+
+
 
 # **********************************************************************
 # display()
