@@ -5,3 +5,16 @@ apos
 algoritmo de dominancia
 faixas 
 plane sweep
+
+
+def CadastraLinhaNasSubdivisoes(i: int):
+    #ponto inicial (x1,y1)
+    #ponto final (x2,y2)
+
+    #vai ocupar linhas no intervalo de x1 até x2 
+    #vai ocupar as colunas do intervalo de y1 até y2 
+
+    #(x1,y1) -> x1 é maior do que 0 e menor do que interLargura -> y1 é maior do que 0 e menor do que interAltura -> (0,0)
+    #(x1,y2) -> 
+    #(x2,y1) 
+    #(x2,y2)
