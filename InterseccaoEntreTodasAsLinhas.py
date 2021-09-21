@@ -18,7 +18,7 @@ import math
 import time
 import numpy as np
 
-N_LINHAS = 100
+N_LINHAS = 500
 MAX_X = 100
 
 ContadorInt = 0
@@ -26,8 +26,9 @@ ContChamadas = 0
 interAltura = 0
 interLargura = 0
 linhas = []
-subdivisoesAltura = 10
-subdivisoesLargura = 10
+subdivisoesAltura =  2
+subdivisoesLargura = 2
+matriz = [[]]
 #matriz = np.empty((subdivisoesAltura, subdivisoesLargura), Celula()) 
 #matriz = np.full((subdivisoesAltura, subdivisoesLargura), Celuloa())
 #matriz = [[Celula() for i in range(subdivisoesAltura)] for j in range(subdivisoesLargura)]
@@ -38,8 +39,8 @@ subdivisoesLargura = 10
 #  Inicializa os parâmetros globais de OpenGL
 #/ **********************************************************************
 def init():
-    global linhas
-    global matriz
+    global linhas, matriz, subdivisoesAltura, subdivisoesLargura
+
     GeraSubdivisoes()
 
     GeraSubdivisoes()
@@ -49,26 +50,31 @@ def init():
     
     linhas = [Linha() for i in range(N_LINHAS)]
     #matriz = [[Celula() for i in range(subdivisoesAltura)] for j in range(subdivisoesLargura)]
-    matriz = [[list() for i in range(subdivisoesAltura)] for j in range(subdivisoesLargura)]
+    matriz = [[list() for i in range(subdivisoesAltura+1)] for j in range(subdivisoesLargura+1)]
 
     for indice, linha in enumerate(linhas):
         linha.geraLinha(MAX_X, 10)
-        CadastraLinhaNasSubdivisoes(indice, linha)
+        yMin, yMax, xMin, xMax = EncontrarCelulas(linha)
+        CadastraLinhaNasSubdivisoes(indice, yMin, yMax, xMin, xMax)
 
 # **********************************************************************
 # CadastraLinhaNasSubdivisoes(indice: int, linha :Linha)
 # armazena a linha na posição 'indice' da matriz 
 # **********************************************************************
-def CadastraLinhaNasSubdivisoes(indice: int, linha: Linha):
-    #global matriz
-    lMin = math.floor(linha.miny / interAltura)
-    jMin = math.floor(linha.minx / interLargura)
-    lMax = math.floor(linha.maxy / interAltura)
-    jMax = math.floor(linha.maxx / interLargura)
-    for l in range (lMin, lMax):
-        for j in range(jMin, jMax):
-            print(indice)
-            matriz[l][j].append(indice)
+def CadastraLinhaNasSubdivisoes(indice: int, yMin: int, yMax: int, xMin: int, xMax: int):
+    global matriz
+    if yMin == yMax and xMin == xMax:
+        matriz[yMin][xMin].append(indice)
+    elif yMin != yMax and xMin == xMax:
+        for y in range(yMin, yMax):
+            matriz[y][xMin].append(indice)
+    elif yMin == yMax and xMin != xMax:
+        for x in range(xMin, xMax):
+            matriz[yMin][x].append(indice)
+    elif yMin != yMax and xMin != xMax:
+        for y in range(yMin, yMax):
+            for x in range(xMin, xMax):
+                matriz[y][x].append(indice)
 
 # **********************************************************************
 #  GeraSubdivisoes( )
@@ -80,8 +86,8 @@ def GeraSubdivisoes():
     global subdivisoesLargura
     global interAltura 
     global interLargura 
-    interAltura = 500 / subdivisoesAltura
-    interLargura = 650 / subdivisoesLargura
+    interLargura = 100 / subdivisoesLargura
+    interAltura = 100 / subdivisoesAltura
 
 
 
@@ -175,7 +181,7 @@ def GeraSubdivisoes():
 def DesenhaLinhas():
     global linhas
 
-    glColor3f(0,1,0)
+    glColor3f(0,0,0)
 
     for linha in linhas:
         linha.desenhaLinha()
@@ -186,7 +192,7 @@ def DesenhaLinhas():
 #
 # **********************************************************************
 def DesenhaCenario():
-    global ContChamadas, ContadorInt, matriz
+    global ContChamadas, ContadorInt 
 
     PA, PB, PC, PD, = Ponto(), Ponto(), Ponto(), Ponto() 
     ContChamadas, ContadorInt = 0, 0
@@ -198,23 +204,70 @@ def DesenhaCenario():
     for i in range(N_LINHAS):
         PA.set(linhas[i].x1, linhas[i].y1)
         PB.set(linhas[i].x2, linhas[i].y2)
-
-        #GeraCandidatasAColisao(i)
-
-        for j in range(N_LINHAS):
-                #print(matriz[1][1])
-                PC.set(linhas[j].x1, linhas[j].y1)
-                PD.set(linhas[j].x2, linhas[j].y2)
-                #AQUI ENTRA NOSSO CODIGO DE ACELERAÇÃO
-                if HaInterseccaoAABB(linhas[i], linhas[j]):
+        yMin, yMax, xMin, xMax = EncontrarCelulas(linhas[i])
+        vetCandidatas = GeraCandidatasAColisao(yMin, yMax, xMin, xMax)
+        for j in vetCandidatas:  
+            if j != linhas[i]:
+                PC.set(j.x1, j.y1)
+                PD.set(j.x2, j.y2)
+                if HaInterseccaoAABB(linhas[i], j):
                     ContChamadas += 1
                     if HaInterseccao(PA, PB, PC, PD):
                         ContadorInt += 1
                         linhas[i].desenhaLinha()
-                        linhas[j].desenhaLinha()
+                        j.desenhaLinha()
                 else:
                     pass
             
+def EncontrarCelulas(linha: Linha()):
+    global matriz
+    linha.miny = 0 if linha.miny < 0 else linha.miny
+    linha.minx = 0 if linha.minx < 0 else linha.minx
+    linha.maxy = 0 if linha.maxy < 0 else linha.maxy
+    linha.maxx = 0 if linha.maxx < 0 else linha.maxx
+    linha.miny = 100 if linha.miny > 100 else linha.miny
+    linha.minx = 100 if linha.minx > 100 else linha.minx
+    linha.maxy = 100 if linha.maxy > 100 else linha.maxy
+    linha.maxx = 100 if linha.maxx > 100 else linha.maxx
+
+    yMin = math.floor(linha.miny / interAltura)
+    xMin = math.floor(linha.minx / interLargura)
+    yMax = math.floor(linha.maxy / interAltura)
+    xMax = math.floor(linha.maxx / interLargura)
+
+    return yMin, yMax, xMin, xMax
+
+# **********************************************************************
+# GeraCandidatasAColisao(index: int) -> List[Linha()]
+# Função que gera uma lista de linhas candidatas, baseada na subdivisão do espaço,
+# à colisão com uma determinada linha.`
+#
+# **********************************************************************
+
+def GeraCandidatasAColisao(yMin: int, yMax: int, xMin: int, xMax: int) -> set():
+    global matriz, linhas
+    candidatas = set()
+
+    if yMin == yMax and xMin == xMax:
+        for indiceLinha in matriz[yMin][xMin]:
+            candidatas.add(linhas[indiceLinha])
+    elif yMin != yMax and xMin == xMax:
+        for y in range(yMin, yMax):
+            for indiceLinha in matriz[y][xMin]:
+                candidatas.add(linhas[indiceLinha])
+    elif yMin == yMax and xMin != xMax:
+        for x in range(xMin, xMax):
+            for indiceLinha in matriz[yMin][x]:
+                candidatas.add(linhas[indiceLinha])
+    elif yMin != yMax and xMin != xMax:
+        for y in range(yMin, yMax):
+            for x in range(xMin, xMax):
+                for indiceLinha in matriz[y][x]:
+                    candidatas.add(linhas[indiceLinha])
+
+    return candidatas
+
+
 
 # **********************************************************************
 # display()
@@ -295,10 +348,18 @@ def keyboard(*args):
 # **********************************************************************
 
 def arrow_keys(a_keys: int, x: int, y: int):
+    global subdivisoesLargura, subdivisoesAltura
     if a_keys == GLUT_KEY_UP:         # Se pressionar UP
-        pass
+        subdivisoesAltura += 1
+        print("Subdivisões na altura:", subdivisoesAltura)
+        init()
+        #pass
     if a_keys == GLUT_KEY_DOWN:       # Se pressionar DOWN
-        pass
+        if subdivisoesAltura > 1:
+            subdivisoesAltura -= 1
+            print("Subdivisões na altura:", subdivisoesAltura)
+            init()
+        #pass
     if a_keys == GLUT_KEY_LEFT:       # Se pressionar LEFT
         pass
     if a_keys == GLUT_KEY_RIGHT:      # Se pressionar RIGHT
