@@ -26,8 +26,8 @@ ContChamadas = 0
 interAltura = 0
 interLargura = 0
 linhas = []
-subdivisoesAltura = 50
-subdivisoesLargura = 50
+subdivisoesAltura =  2
+subdivisoesLargura = 2
 matriz = [[]]
 #matriz = np.empty((subdivisoesAltura, subdivisoesLargura), Celula()) 
 #matriz = np.full((subdivisoesAltura, subdivisoesLargura), Celuloa())
@@ -39,8 +39,8 @@ matriz = [[]]
 #  Inicializa os parâmetros globais de OpenGL
 #/ **********************************************************************
 def init():
-    global linhas
-    global matriz
+    global linhas, matriz, subdivisoesAltura, subdivisoesLargura
+
     GeraSubdivisoes()
 
     # Define a cor do fundo da tela (BRANCO) 
@@ -52,29 +52,15 @@ def init():
 
     for indice, linha in enumerate(linhas):
         linha.geraLinha(MAX_X, 10)
-        CadastraLinhaNasSubdivisoes(indice, linha)
+        yMin, yMax, xMin, xMax = EncontrarCelulas(linha)
+        CadastraLinhaNasSubdivisoes(indice, yMin, yMax, xMin, xMax)
 
 # **********************************************************************
 # CadastraLinhaNasSubdivisoes(indice: int, linha :Linha)
 # armazena a linha na posição 'indice' da matriz 
 # **********************************************************************
-def CadastraLinhaNasSubdivisoes(indice: int, linha: Linha):
+def CadastraLinhaNasSubdivisoes(indice: int, yMin: int, yMax: int, xMin: int, xMax: int):
     global matriz
-    linha.miny = 0 if linha.miny < 0 else linha.miny
-    linha.minx = 0 if linha.minx < 0 else linha.minx
-    linha.maxy = 0 if linha.maxy < 0 else linha.maxy
-    linha.maxx = 0 if linha.maxx < 0 else linha.maxx
-    linha.miny = 100 if linha.miny > 100 else linha.miny
-    linha.minx = 100 if linha.minx > 100 else linha.minx
-    linha.maxy = 100 if linha.maxy > 100 else linha.maxy
-    linha.maxx = 100 if linha.maxx > 100 else linha.maxx
-
-    yMin = math.floor(linha.miny / interAltura)
-    xMin = math.floor(linha.minx / interLargura)
-    yMax = math.floor(linha.maxy / interAltura)
-    xMax = math.floor(linha.maxx / interLargura)
-    #print(yMin, yMax)
-    #print(xMin, xMax)
     if yMin == yMax and xMin == xMax:
         matriz[yMin][xMin].append(indice)
     elif yMin != yMax and xMin == xMax:
@@ -87,18 +73,6 @@ def CadastraLinhaNasSubdivisoes(indice: int, linha: Linha):
         for y in range(yMin, yMax):
             for x in range(xMin, xMax):
                 matriz[y][x].append(indice)
-
-        #for y in range (yMin, yMax):
-            #if xMin != xMax:
-                #for x in range(xMin, xMax):
-                    #matriz[y][x].append(indice)
-            #else:
-                    #matriz[y][x].append(indice)
-    #else: 
-        #for x in range(xMin, xMax):
-            #matriz[yMin][x].append(indice)
-
-
 
 # **********************************************************************
 #  GeraSubdivisoes( )
@@ -206,7 +180,7 @@ def DesenhaLinhas():
 #
 # **********************************************************************
 def DesenhaCenario():
-    global ContChamadas, ContadorInt, matriz
+    global ContChamadas, ContadorInt 
 
     PA, PB, PC, PD, = Ponto(), Ponto(), Ponto(), Ponto() 
     ContChamadas, ContadorInt = 0, 0
@@ -218,7 +192,8 @@ def DesenhaCenario():
     for i in range(N_LINHAS):
         PA.set(linhas[i].x1, linhas[i].y1)
         PB.set(linhas[i].x2, linhas[i].y2)
-        vetCandidatas = GeraCandidatasAColisao(linhas[i])
+        yMin, yMax, xMin, xMax = EncontrarCelulas(linhas[i])
+        vetCandidatas = GeraCandidatasAColisao(yMin, yMax, xMin, xMax)
         for j in vetCandidatas:  
             if j != linhas[i]:
                 PC.set(j.x1, j.y1)
@@ -232,16 +207,8 @@ def DesenhaCenario():
                 else:
                     pass
             
-# **********************************************************************
-# GeraCandidatasAColisao(index: int) -> List[Linha()]
-# Função que gera uma lista de linhas candidatas, baseada na subdivisão do espaço,
-# à colisão com uma determinada linha.`
-#
-# **********************************************************************
-
-def GeraCandidatasAColisao(linha: Linha()) -> set():
-    global matriz, linhas
-    candidatas = set()
+def EncontrarCelulas(linha: Linha()):
+    global matriz
     linha.miny = 0 if linha.miny < 0 else linha.miny
     linha.minx = 0 if linha.minx < 0 else linha.minx
     linha.maxy = 0 if linha.maxy < 0 else linha.maxy
@@ -251,11 +218,23 @@ def GeraCandidatasAColisao(linha: Linha()) -> set():
     linha.maxy = 100 if linha.maxy > 100 else linha.maxy
     linha.maxx = 100 if linha.maxx > 100 else linha.maxx
 
-
     yMin = math.floor(linha.miny / interAltura)
     xMin = math.floor(linha.minx / interLargura)
     yMax = math.floor(linha.maxy / interAltura)
     xMax = math.floor(linha.maxx / interLargura)
+
+    return yMin, yMax, xMin, xMax
+
+# **********************************************************************
+# GeraCandidatasAColisao(index: int) -> List[Linha()]
+# Função que gera uma lista de linhas candidatas, baseada na subdivisão do espaço,
+# à colisão com uma determinada linha.`
+#
+# **********************************************************************
+
+def GeraCandidatasAColisao(yMin: int, yMax: int, xMin: int, xMax: int) -> set():
+    global matriz, linhas
+    candidatas = set()
 
     if yMin == yMax and xMin == xMax:
         for indiceLinha in matriz[yMin][xMin]:
@@ -357,10 +336,18 @@ def keyboard(*args):
 # **********************************************************************
 
 def arrow_keys(a_keys: int, x: int, y: int):
+    global subdivisoesLargura, subdivisoesAltura
     if a_keys == GLUT_KEY_UP:         # Se pressionar UP
-        pass
+        subdivisoesAltura += 1
+        print("Subdivisões na altura:", subdivisoesAltura)
+        init()
+        #pass
     if a_keys == GLUT_KEY_DOWN:       # Se pressionar DOWN
-        pass
+        if subdivisoesAltura > 1:
+            subdivisoesAltura -= 1
+            print("Subdivisões na altura:", subdivisoesAltura)
+            init()
+        #pass
     if a_keys == GLUT_KEY_LEFT:       # Se pressionar LEFT
         pass
     if a_keys == GLUT_KEY_RIGHT:      # Se pressionar RIGHT
