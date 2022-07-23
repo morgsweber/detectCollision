@@ -7,6 +7,6 @@ The main idea of this project is detec colisions using some techniques.
 
 
 ##### Requirements 
-- [Python] https://www.python.org/downloads/
+- [Python](https://www.python.org/downloads/)
 - Python OpenGL Library
 
